@@ -3,7 +3,8 @@
 Веб-приложение для подготовки к экзамену CIA Part 1 «Internal Audit Fundamentals» (программа 2025, GIAS 2024).
 Требования — в [docs/PRD.md](docs/PRD.md).
 
-- Опубликованная версия: https://claude.ai/artifact/9hPzfCQtBcGSprHJF1MXWn
+- Веб-версия (GitHub Pages): https://r02335899-rusland.github.io/cia-part1-trainer/
+- Версия на claude.ai (облачное сохранение и генерация вопросов): https://claude.ai/artifact/9hPzfCQtBcGSprHJF1MXWn
 - Исходник: [app/index.html](app/index.html) — одна HTML-страница без сборки
 
 ## Структура
