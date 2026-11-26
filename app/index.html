@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CIA Part 1 тренажёр</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: спокойный вечерний стол — сосредоточенно, без шума, всё для 20 минут после работы
+   IDEA: экзаменационный бланк + рабочий документ аудитора: вопрос, отметка, разбор со ссылкой на стандарт
+   PICTURE: сам вопрос с вариантами — крупно, сверху; рядом кольцо дневной цели
+   COLOUR and TYPE: сливово-чёрный фон, белый, розовый акцент, сумеречный лиловый; Inter Tight 300 + Inter
+   LAYOUT: шапка со счётчиками, вкладки, рабочая зона одной колонкой до 860px */
+:root{color-scheme:dark;--bg:#1a0f1f;--card:#24172b;--line:#3a2a42;--ink:#fff;--mute:#c9bdd2;--rose:#ff8fa3;--dusk:#8f7aa8;--ok:#86d9b4;--bad:#ff8fa3}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:900px;margin:0 auto;padding:clamp(20px,4vw,44px) max(4vw,16px) 60px}
+h1{font:300 clamp(32px,5vw,48px)/1.05 "Inter Tight",sans-serif;margin:0 0 6px;text-wrap:balance}
+h2{font:500 24px/1.2 "Inter Tight",sans-serif;margin:0 0 14px}
+.sub{color:var(--mute);margin:0}
+.top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center}
+.stats{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.stat b{display:block;font:300 34px/1 "Inter Tight",sans-serif}
+.stat span{font-size:13px;color:var(--mute)}
+.ring{position:relative;width:96px;height:96px}
+.ring svg{width:96px;height:96px;transform:rotate(-90deg)}
+.ring div{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-size:13px;color:var(--mute)}
+.ring div b{font:500 22px/1 "Inter Tight",sans-serif;color:var(--ink)}
+.nudge{margin:22px 0 0;padding:14px 18px;border-radius:12px;background:#2e1a2c;border:1px solid #5a2f45;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.nudge.done{background:#17261f;border-color:#2f5a47}
+nav{display:flex;gap:6px;margin:26px 0 20px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav button{flex:none;background:none;border:0;color:var(--mute);font:500 15px Inter;padding:12px 14px;min-height:44px;cursor:pointer;border-bottom:2px solid transparent}
+nav button[aria-selected=true]{color:var(--ink);border-color:var(--rose)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(18px,3vw,28px)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select,input{font:16px Inter;background:#120a16;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
+.btn{font:600 15px Inter;border-radius:10px;padding:11px 18px;min-height:44px;cursor:pointer;border:1px solid var(--line);background:#2f2138;color:var(--ink)}
+.btn.pri{background:var(--rose);border-color:var(--rose);color:#2a0f18}
+.btn:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+.meta{font-size:13px;color:var(--dusk);margin-bottom:10px}
+.stem{font-size:18px;line-height:1.5;margin:0 0 18px}
+.opts{display:grid;gap:10px}
+.opt{display:grid;grid-template-columns:32px minmax(0,1fr);gap:10px;text-align:left;font:16px/1.45 Inter;color:var(--ink);background:#1d1123;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;min-height:44px}
+.opt i{font-style:normal;font-weight:600;color:var(--dusk)}
+.opt:hover:not(:disabled){border-color:var(--dusk)}
+.opt.pick{border-color:var(--rose)}
+.opt.good{border-color:var(--ok);background:#15281f}
+.opt.bad{border-color:var(--bad);background:#33161f}
+.opt:disabled{cursor:default}
+.why{margin-top:20px;border-top:1px solid var(--line);padding-top:18px}
+.verdict{font:500 22px "Inter Tight",sans-serif;margin:0 0 8px}
+.verdict.ok{color:var(--ok)}.verdict.no{color:var(--bad)}
+.why ul{padding-left:18px;margin:10px 0}.why li{margin:6px 0;color:var(--mute)}
+.why li b{color:var(--ink)}
+.ref{display:inline-block;font-size:13px;color:var(--dusk);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+.ai{white-space:pre-wrap;color:var(--mute);margin-top:12px}
+.note{font-size:13px;color:var(--mute)}
+mark{background:#ff8fa32e;color:var(--rose);padding:0 3px;border-radius:4px}
+.ru{color:var(--mute);font-size:15px;margin:-8px 0 18px}
+.opt small{display:block;color:var(--mute);font-size:14px;margin-top:3px}
+.hint{background:#2e1a2c;border:1px solid #5a2f45;border-radius:10px;padding:10px 14px}
+.cues{width:100%;border-collapse:collapse}.cues td{border-top:1px solid var(--line);padding:10px 8px;vertical-align:top}.cues td:first-child{font-weight:600;color:var(--rose);white-space:nowrap}
+label.chk{display:flex;gap:10px;align-items:center;min-height:44px}label.chk input{width:20px;height:20px;min-height:0}
+.timer{font:300 40px/1 "Inter Tight",sans-serif;font-variant-numeric:tabular-nums}
+.timer.low{color:var(--rose)}
+.grid{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+.grid button{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:#1d1123;color:var(--mute);font:13px Inter;cursor:pointer}
+.grid button.a{background:#3a2a42;color:var(--ink)}.grid button.cur{border-color:var(--rose)}
+.grid button.f{box-shadow:inset 0 -3px 0 var(--rose)}
+.bars{display:grid;gap:16px}
+.bar .lab{display:flex;justify-content:space-between;gap:10px;font-size:15px;flex-wrap:wrap}
+.bar .lab span{color:var(--mute);font-size:13px;white-space:nowrap}
+.track{position:relative;height:12px;background:#120a16;border-radius:6px;margin-top:6px;overflow:hidden}
+.track i{position:absolute;inset:0 auto 0 0;background:var(--dusk);border-radius:6px}
+.track i.hi{background:var(--ok)}.track i.lo{background:var(--rose)}
+.track s{position:absolute;top:0;bottom:0;left:80%;width:2px;background:#fff8}
+.heat{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;max-width:440px}
+.heat i{aspect-ratio:1;border-radius:4px;background:#120a16}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+details{border-top:1px solid var(--line);padding:12px 0}
+summary{cursor:pointer}
+.big{font:300 64px/1 "Inter Tight",sans-serif}
+.hide{display:none!important}
+@media(max-width:600px){.top{grid-template-columns:1fr}.stem{font-size:17px}}
+@media(prefers-reduced-motion:no-preference){.ring circle.p{transition:stroke-dashoffset .6s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>CIA Part 1 · тренажёр</h1>
+      <p class="sub">Internal Audit Fundamentals · программа 2025, Global Internal Audit Standards</p>
+    </div>
+    <div class="stats">
+      <div class="ring" aria-label="Цель на сегодня">
+        <svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" fill="none" stroke="#3a2a42" stroke-width="9"/><circle class="p" id="ringP" cx="48" cy="48" r="40" fill="none" stroke="#ff8fa3" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="251.3"/></svg>
+        <div><b id="tCount">0</b>из <span id="tGoal">20</span></div>
+      </div>
+      <div class="stat"><b id="streak">0</b><span>дней подряд</span></div>
+      <div class="stat"><b id="pace">—</b><span>сек на вопрос · цель 72</span></div>
+      <div class="stat"><b id="toExam">—</b><span id="toExamL">дата экзамена не задана</span></div>
+    </div>
+  </div>
+  <div class="nudge" id="nudge"><span id="nudgeT"></span><button class="btn pri" id="quick">Начать 10 минут</button></div>
+
+  <nav role="tablist">
+    <button role="tab" data-v="train" aria-selected="true">Тренировка</button>
+    <button role="tab" data-v="exam">Экзамен на время</button>
+    <button role="tab" data-v="wrong">Ошибки <span id="wrongN"></span></button>
+    <button role="tab" data-v="cues">Подсказки в EN</button>
+    <button role="tab" data-v="prog">Прогресс</button>
+    <button role="tab" data-v="set">Настройки</button>
+  </nav>
+
+  <section id="v-train">
+    <div class="row" style="margin-bottom:16px">
+      <select id="secSel" aria-label="Раздел"></select>
+      <button class="btn pri" id="nextBtn">Следующий вопрос</button>
+      <button class="btn" id="genBtn">Новые вопросы от Claude</button>
+    </div>
+    <p class="note" id="genNote"></p>
+    <div class="card" id="qCard"></div>
+  </section>
+
+  <section id="v-exam" class="hide">
+    <div class="card" id="examBox"></div>
+  </section>
+
+  <section id="v-wrong" class="hide">
+    <div class="card" id="wrongBox"></div>
+  </section>
+
+  <section id="v-cues" class="hide">
+    <div class="card">
+      <h2>Слова-подсказки в английских вопросах</h2>
+      <p>В переводе эти нюансы часто стираются. Тренируйтесь в режиме «английский + перевод»: так вы привыкнете видеть оригинальные формулировки и узнавать их за переводом. Если на экзамене доступна английская версия вопроса, сверяйтесь с ней, когда перевод кажется двусмысленным.</p>
+      <table class="cues stack"><thead><tr><th>Слово</th><th>Что оно подсказывает</th></tr></thead><tbody>
+        <tr><td>MOST / BEST</td><td>Верными могут быть несколько вариантов — нужен наилучший. Ищите тот, что ближе всего к духу Стандартов (независимость, риск-ориентированность, совет).</td></tr>
+        <tr><td>FIRST / INITIAL</td><td>Вопрос о последовательности. Обычно сначала — понять/спланировать/сообщить CAE, а не действовать или выпускать отчёт.</td></tr>
+        <tr><td>NOT / EXCEPT / LEAST</td><td>Логика переворачивается: ищите лишний или наименее подходящий вариант. В переводе отрицание легко пропустить — перечитайте стем.</td></tr>
+        <tr><td>must</td><td>Требование Стандартов (обязательно). <b>should</b> — ожидаемая практика, допускает обоснованное отступление; <b>may</b> — допустимо.</td></tr>
+        <tr><td>primary responsibility</td><td>За риски, контроли и предотвращение мошенничества — почти всегда management; за надзор — board; за независимую оценку — internal audit.</td></tr>
+        <tr><td>approve / oversee</td><td>Совет: утверждает Положение о ВА, план, бюджет, назначение и освобождение CAE. CAE «develops», руководство «supports».</td></tr>
+        <tr><td>assurance / advisory</td><td>Assurance — независимая оценка по критериям; advisory — по запросу, объём согласован с клиентом, без принятия управленческих обязанностей.</td></tr>
+        <tr><td>independence / objectivity</td><td>Independence — свойство функции (подчинённость, Принцип 7). Objectivity — состояние аудитора (Принцип 2).</td></tr>
+        <tr><td>always / never / only / all</td><td>Абсолюты в вариантах ответа чаще всего неверны.</td></tr>
+        <tr><td>within the previous 12 months</td><td>Ловушка со сроками: смотрите на число месяцев и вид услуги (assurance или advisory).</td></tr>
+        <tr><td>board / senior management</td><td>Не взаимозаменяемы: вопрос о том, кто утверждает, кому сообщают и кто принимает риск.</td></tr>
+        <tr><td>risk appetite / tolerance</td><td>Appetite — сколько риска готовы принять; tolerance — допустимое отклонение по конкретной цели.</td></tr>
+      </tbody></table>
+      <h2 style="margin-top:26px">Тактика времени на Part 1</h2>
+      <ul>
+        <li>72 секунды в среднем на вопрос. Вопрос на знание («что такое», «кто утверждает») — 30–40 с; освободившееся время уходит на ситуационные задачи.</li>
+        <li>Сначала прочитайте последнее предложение (что спрашивают), затем ситуацию.</li>
+        <li>Не знаете ответа за 90 секунд — отметьте вопрос (флажок), выберите лучший вариант и идите дальше. За неправильный ответ баллы не снимают — пустых не оставляйте.</li>
+        <li>Контрольные точки: 25 вопросов — около 30 мин, 50 — 60 мин, 100 — 120 мин. Остаётся 30 мин на отмеченные вопросы.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="v-prog" class="hide">
+    <div class="card" id="progBox"></div>
+  </section>
+
+  <section id="v-set" class="hide">
+    <div class="card">
+      <h2>Настройки</h2>
+      <div class="two">
+        <label>Дата экзамена Part 1<br><input type="date" id="examDate"></label>
+        <label>Цель на день, вопросов<br><input type="number" id="goal" min="5" max="150" step="5"></label>
+        <label>Язык вопросов<br><select id="lang"><option value="both">Английский + русский перевод</option><option value="en">Только английский</option><option value="ru">Только русский</option></select></label>
+        <label class="chk"><input type="checkbox" id="hl"> Подсвечивать слова-подсказки сразу (до ответа)</label>
+      </div>
+      <p class="note" id="saveState" style="margin-top:16px"></p>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="copyBtn">Скопировать прогресс (JSON)</button>
+        <button class="btn" id="resetBtn">Сбросить статистику</button>
+      </div>
+      <p class="note" id="setMsg"></p>
+    </div>
+  </section>
+  <p class="note" style="margin-top:28px">Исходный банк — 27 авторских вопросов по GIAS (2024) и программе CIA 2025; новые вопросы генерирует Claude. Это тренировочные вопросы, а не официальные вопросы IIA — сверяйте спорные моменты с текстом Стандартов.</p>
+</div>
+
+<script>
+{
+const SEC={A:['Основы внутреннего аудита',35],B:['Этика и профессионализм',20],C:['Управление, риск-менеджмент и контроль',30],D:['Риски мошенничества',15]};
+const SEED=[
+{id:'A1',s:'A',q:'Как структурированы Глобальные стандарты внутреннего аудита (GIAS, 2024)?',o:['5 доменов, 15 принципов, 52 стандарта','4 домена, 12 принципов, 40 стандартов','6 доменов, 17 принципов, 52 стандарта','3 домена, 10 принципов, 60 стандартов'],c:0,e:'GIAS состоят из 5 доменов (I Цель ВА; II Этика и профессионализм; III Управление функцией ВА; IV Руководство функцией ВА; V Выполнение услуг ВА), 15 принципов и 52 стандартов.',w:['','Похоже на смешение со старой IPPF.','17 принципов — это COSO 2013, не GIAS.','Не соответствует структуре GIAS.'],r:'GIAS, Домены I–V'},
+{id:'A2',s:'A',q:'Какие компоненты обновлённой IPPF (2024) обязательны для применения?',o:['Глобальные стандарты ВА и Тематические требования','Глобальные стандарты ВА и Глобальное руководство','Миссия, Основные принципы и Кодекс этики','Только Глобальные стандарты ВА'],c:0,e:'IPPF 2024 включает GIAS, Тематические требования (Topical Requirements) и Глобальное руководство (Global Guidance). Обязательны первые два; Глобальное руководство — рекомендуемое.',w:['','Глобальное руководство (практические руководства, GTAG) не обязательно.','Это элементы прежней IPPF 2017, они интегрированы в GIAS.','Тематические требования тоже обязательны.'],r:'IPPF 2024'},
+{id:'A3',s:'A',q:'Согласно формулировке цели внутреннего аудита (Purpose), кому ВА предоставляет независимые, основанные на риске и объективные заверения, консультации, аналитику и прогнозы?',o:['Совету и руководству','Акционерам и регулятору','Внешнему аудитору','Руководителям проверяемых подразделений'],c:0,e:'Цель ВА: усиливать способность организации создавать, защищать и поддерживать ценность, предоставляя совету и руководству независимые, основанные на риске и объективные заверения, консультации, аналитику и прогнозы.',w:['','Это внешние заинтересованные стороны, а не адресаты по формулировке цели.','Внешний аудитор — другой поставщик заверений.','Они получают результаты заданий, но формулировка цели говорит о совете и руководстве.'],r:'Домен I'},
+{id:'A4',s:'A',q:'Кто утверждает Положение (устав) о внутреннем аудите?',o:['Совет (board)','Генеральный директор','Руководитель СВА (CAE)','Комитет по рискам менеджмента'],c:0,e:'CAE разрабатывает и поддерживает Положение о ВА, обсуждает его с советом и высшим руководством, а утверждает его совет.',w:['','Руководство поддерживает ВА, но утверждение — прерогатива совета.','CAE готовит документ, но не утверждает его сам.','Менеджмент не может утверждать документ, гарантирующий независимость от него же.'],r:'Стандарт 6.2'},
+{id:'A5',s:'A',q:'Какая схема подчинённости лучше всего обеспечивает организационную независимость CAE?',o:['Функционально — совету, административно — CEO','Функционально и административно — финансовому директору','Функционально — CEO, административно — совету','Функционально — комитету менеджмента по рискам'],c:0,e:'CAE должен подчиняться непосредственно совету (функционально) и иметь административную линию к уровню руководства, позволяющему выполнять обязанности без вмешательства — обычно CEO.',w:['','CFO отвечает за проверяемые финансовые процессы — конфликт.','Схема перевёрнута: функциональное подчинение должно быть совету.','Это вторая линия; подчинение ей ограничивает независимость.'],r:'Стандарт 7.1'},
+{id:'A6',s:'A',q:'Какое задание относится к консультационным (advisory), а не к заверительным услугам?',o:['По запросу руководства СВА помогает спроектировать контроли для внедряемой ERP','СВА оценивает эффективность контролей закупок по утверждённому плану','СВА выражает мнение о соблюдении политики ПОД/ФТ','СВА проверяет устранение ранее выявленных недостатков'],c:0,e:'В консультационных услугах характер и объём согласуются с заказчиком, а СВА не принимает на себя управленческих обязанностей. Помощь в проектировании контролей по запросу — типичный пример.',w:['','Это заверение: независимая оценка по критериям.','Выражение мнения о соответствии — заверение.','Мониторинг устранения — часть заверительной работы (Стандарт 15.2).'],r:'Глоссарий: Advisory / Assurance services'},
+{id:'A7',s:'A',q:'Когда СВА обязана соблюдать Тематическое требование (например, по кибербезопасности)?',o:['Когда тема входит в объём задания или выявлена в риск-ориентированном плане','Только если этого требует регулятор','Всегда, в каждом задании, независимо от объёма','Только при проведении внешней оценки качества'],c:0,e:'Тематические требования обязательны, когда соответствующая тема включена в объём задания (в т.ч. выявлена в плане ВА или по запросу вне плана).',w:['','Обязательность установлена IPPF, а не регулятором.','Применяются только в пределах объёма, а не к каждому заданию.','Внешняя оценка проверит соблюдение, но не является условием применения.'],r:'IPPF: Topical Requirements'},
+{id:'A8',s:'A',q:'Кто должен утверждать решения о назначении и освобождении CAE от должности?',o:['Совет','CEO самостоятельно','Директор по персоналу','Внешний аудитор'],c:0,e:'К основным условиям (Essential Conditions) для совета относится утверждение решений о назначении и освобождении CAE — это защищает независимость функции.',w:['','Если CEO решает единолично, CAE зависим от проверяемого менеджмента.','HR оформляет кадровые процедуры, но не принимает решение.','Внешний аудитор не участвует в управлении СВА.'],r:'Стандарт 7.1, Essential Conditions'},
+{id:'B1',s:'B',q:'Аудитор 8 месяцев назад перешёл в СВА из отдела закупок. CAE хочет назначить его на заверительное задание по закупкам. Как правильно?',o:['Объективность считается нарушенной — не назначать на заверение этой деятельности','Можно назначить, если аудитор подпишет декларацию об отсутствии конфликта','Можно назначить под надзором старшего аудитора','Можно, если в отчёте раскрыть прошлую работу аудитора'],c:0,e:'Объективность считается нарушенной, если аудитор даёт заверения по деятельности, за которую отвечал в предыдущие 12 месяцев. Правильное решение — переназначить.',w:['','Декларация не снимает презумпцию нарушения.','Надзор не устраняет нарушение объективности.','Раскрытие — для случаев, когда нарушение уже произошло, а не способ его допустить.'],r:'Стандарт 2.2'},
+{id:'B2',s:'B',q:'Что из перечисленного НЕ является одним из пяти принципов домена «Этика и профессионализм»?',o:['Независимость','Честность (Integrity)','Профессиональная тщательность','Конфиденциальность'],c:0,e:'Принципы домена II: 1 Честность, 2 Объективность, 3 Компетентность, 4 Надлежащая профессиональная тщательность, 5 Конфиденциальность. Независимость — принцип 7 в домене III (управление функцией ВА).',w:['','Принцип 1.','Принцип 4.','Принцип 5.'],r:'Домен II, Принципы 1–5'},
+{id:'B3',s:'B',q:'Руководство объясняет резкий рост расходов «разовой акцией». Что требует профессиональный скептицизм?',o:['Подтвердить объяснение независимыми доказательствами','Принять объяснение, если руководитель высокого уровня','Сразу отразить это как нарушение в отчёте','Исключить статью из объёма проверки'],c:0,e:'Профессиональный скептицизм — критическая оценка информации и пытливость ума: объяснения руководства подтверждаются доказательствами, а не принимаются на веру.',w:['','Статус источника не заменяет доказательства.','Вывод без доказательств — тоже нарушение тщательности.','Уход от риска противоречит цели задания.'],r:'Стандарт 4.3'},
+{id:'B4',s:'B',q:'Знакомый из другой компании спрашивает аудитора, будет ли в его организации сокращение, о котором аудитор узнал в ходе проверки. Как поступить?',o:['Отказать: информация получена в ходе работы и не раскрывается без разрешения','Ответить в общих чертах, без цифр','Ответить, если информация скоро станет публичной','Посоветоваться с проверяемым руководителем'],c:0,e:'Аудиторы не используют и не раскрывают информацию, полученную при выполнении работы, без надлежащего разрешения, если только этого не требует закон или регулятор.',w:['','Даже «в общих чертах» — раскрытие.','До официального раскрытия информация остаётся конфиденциальной.','Вопрос не требует согласования — ответ всё равно отказ.'],r:'Стандарты 5.1, 5.2'},
+{id:'B5',s:'B',q:'В ходе задания аудитор понял, что владелец проверяемого процесса — его близкий родственник. Что сделать в первую очередь?',o:['Незамедлительно раскрыть это CAE или руководителю задания','Продолжить работу, но тщательнее документировать','Раскрыть конфликт в итоговом отчёте','Выйти из задания, никому не сообщая причину'],c:0,e:'При фактическом или предполагаемом нарушении объективности аудитор должен своевременно раскрыть его соответствующим сторонам (CAE / руководитель), чтобы те приняли меры.',w:['','Документирование не устраняет конфликт.','Раскрытие нужно сразу, а не после работы.','Скрытый выход не позволяет CAE оценить последствия.'],r:'Стандарт 2.3'},
+{id:'B6',s:'B',q:'Какое утверждение о надлежащей профессиональной тщательности верно?',o:['Она не означает непогрешимости','Она гарантирует выявление всех существенных рисков','Она требует проверки 100% операций','Она применяется только к заверительным заданиям'],c:0,e:'Надлежащая тщательность — это осмотрительность и компетентность разумного аудитора с учётом сложности, существенности, затрат и выгод, но не гарантия выявления всех проблем.',w:['','Гарантий абсолютного выявления не существует.','Объём тестирования определяется риском и экономической целесообразностью.','Применяется ко всем услугам ВА.'],r:'Стандарт 4.2'},
+{id:'B7',s:'B',q:'Руководитель проверяемого подразделения дарит аудитору дорогие часы в конце проверки. Как правильно поступить?',o:['Отказаться и действовать по политике организации о подарках','Принять, так как проверка уже завершена','Принять и указать подарок в отчёте','Принять, если стоимость ниже месячной зарплаты'],c:0,e:'Честность и объективность требуют не принимать ничего, что может нарушить или казаться нарушающим профессиональное суждение; действует политика организации.',w:['','Будущие проверки и восприятие объективности всё равно под угрозой.','Раскрытие не исправляет нарушения.','Произвольный порог не соответствует принципам.'],r:'Принципы 1, 2'},
+{id:'C1',s:'C',q:'Сколько компонентов и принципов в модели внутреннего контроля COSO (2013)?',o:['5 компонентов, 17 принципов','5 компонентов, 20 принципов','8 компонентов, 17 принципов','4 компонента, 15 принципов'],c:0,e:'COSO IC 2013: контрольная среда, оценка рисков, контрольные действия, информация и коммуникация, мониторинг — 17 принципов.',w:['','20 принципов — у COSO ERM 2017.','8 компонентов — у старой COSO ERM 2004.','Не соответствует модели.'],r:'COSO Internal Control — Integrated Framework (2013)'},
+{id:'C2',s:'C',q:'Кто по Модели трёх линий (IIA, 2020) выполняет роли второй линии?',o:['Руководство — функции риск-менеджмента, комплаенса, контроля качества','Внутренний аудит','Совет директоров','Внешний аудитор'],c:0,e:'Роли второй линии — экспертиза, поддержка, мониторинг и оспаривание по вопросам рисков — выполняет руководство. ВА — третья линия, совет — управляющий орган, внешний аудитор — внешний поставщик заверений.',w:['','Это третья линия.','Это управляющий орган (governing body).','Это внешний поставщик заверений.'],r:'Модель трёх линий IIA'},
+{id:'C3',s:'C',q:'Какой контроль является выявляющим (detective)?',o:['Ежемесячная сверка банковской выписки с главной книгой','Разделение обязанностей при проведении платежей','Двойная авторизация платежа до отправки','Ограничение прав доступа в ERP'],c:0,e:'Сверка выявляет ошибки и нарушения после их возникновения. Остальные варианты предотвращают события.',w:['','Предупреждающий контроль.','Предупреждающий контроль.','Предупреждающий контроль.'],r:'Типы контролей'},
+{id:'C4',s:'C',q:'Что такое риск-аппетит?',o:['Объём и вид риска, который организация готова принять ради достижения целей','Максимальный убыток, который организация способна пережить','Риск, остающийся после мер руководства','Допустимое отклонение от отдельной цели'],c:0,e:'Риск-аппетит — уровень и типы риска, которые организация готова принимать при создании ценности.',w:['','Это ближе к риск-ёмкости (risk capacity).','Это остаточный риск.','Это толерантность к риску.'],r:'COSO ERM 2017; Глоссарий GIAS'},
+{id:'C5',s:'C',q:'Остаточный риск — это:',o:['Риск, остающийся после действий руководства по реагированию на риск','Риск до применения любых контролей','Риск того, что аудитор не выявит существенную ошибку','Риск, переданный страховщику'],c:0,e:'Остаточный риск остаётся после реагирования (контролей); присущий — до него.',w:['','Это присущий риск.','Это аудиторский (риск необнаружения).','Передача — один из способов реагирования, а не определение остаточного риска.'],r:'Риск-менеджмент'},
+{id:'C6',s:'C',q:'Что НЕ является компонентом COSO ERM 2017?',o:['Контрольные действия','Управление и культура','Стратегия и постановка целей','Анализ и пересмотр'],c:0,e:'Компоненты COSO ERM 2017: Управление и культура; Стратегия и постановка целей; Результативность; Анализ и пересмотр; Информация, коммуникация и отчётность. «Контрольные действия» — компонент COSO IC 2013.',w:['','Компонент ERM 2017.','Компонент ERM 2017.','Компонент ERM 2017.'],r:'COSO ERM 2017'},
+{id:'C7',s:'C',q:'Чья основная ответственность — проектирование и функционирование системы внутреннего контроля?',o:['Руководства','Внутреннего аудита','Совета директоров','Внешнего аудитора'],c:0,e:'Руководство (первая и вторая линии) отвечает за риски и контроли; совет осуществляет надзор; ВА даёт независимую оценку.',w:['','ВА оценивает, но не владеет контролями — иначе нарушится объективность.','Совет осуществляет надзор, а не проектирует контроли.','Внешний аудитор лишь оценивает контроли для целей аудита отчётности.'],r:'Модель трёх линий; Стандарт 9.1'},
+{id:'D1',s:'D',q:'На какой элемент треугольника мошенничества организация влияет наиболее непосредственно?',o:['Возможность','Давление (мотив)','Рационализация','Все три в равной мере'],c:0,e:'Возможность снижается контролями: разделение обязанностей, авторизация, мониторинг. Давление и рационализация — внутренние факторы человека.',w:['','Мотивы лежат во многом вне контроля организации.','Рационализация — внутренний процесс; культура влияет лишь косвенно.','Влияние неравное: контроли работают на возможность.'],r:'Треугольник мошенничества (Cressey)'},
+{id:'D2',s:'D',q:'Какой признак наиболее характерен для схемы «лэппинг» (lapping) с дебиторской задолженностью?',o:['Задержки зачисления платежей клиентов и отказ сотрудника от отпуска','Рост количества поставщиков с одинаковыми адресами','Резкий рост представительских расходов','Частые корректировки остатков запасов'],c:0,e:'При лэппинге оплату одного клиента присваивают и покрывают её платежами следующих — отсюда задержки зачисления; сотрудник избегает отпуска, чтобы схема не вскрылась.',w:['','Признак фиктивных поставщиков.','Признак злоупотреблений с расходами.','Признак хищения запасов.'],r:'Схемы мошенничества с активами'},
+{id:'D3',s:'D',q:'Какое утверждение о роли внутренних аудиторов в отношении мошенничества верно?',o:['Аудиторы должны знать достаточно, чтобы оценивать риски мошенничества, но не обязаны быть экспертами-расследователями','Аудиторы несут основную ответственность за предотвращение мошенничества','Аудиторы обязаны выявлять все случаи мошенничества','Мошенничество вне компетенции ВА'],c:0,e:'Предотвращение — ответственность руководства. ВА должен обладать компетенциями для оценки рисков мошенничества и того, как организация ими управляет.',w:['','Предотвращение — задача руководства.','Гарантировать выявление всех случаев невозможно.','Риски мошенничества — часть оценки ВА.'],r:'Стандарт 3.1; раздел программы «Fraud Risks»'},
+{id:'D4',s:'D',q:'Аудитор обнаружил признаки возможного мошенничества. Что сделать в первую очередь?',o:['Сообщить CAE и действовать по политике организации о расследованиях','Опросить подозреваемого, чтобы получить признание','Сразу сообщить в правоохранительные органы','Продолжить тесты, ничего не сообщая, до сбора всех доказательств'],c:0,e:'Аудитор своевременно информирует соответствующий уровень (CAE), который решает о расследовании с участием юристов и экспертов. Самостоятельная конфронтация может повредить расследованию.',w:['','Опрос без плана и юристов вредит расследованию и правам сторон.','Решение об обращении в органы принимается по процедурам организации.','Задержка увеличивает ущерб и риск уничтожения доказательств.'],r:'Fraud Risks; Стандарт 11.3'},
+{id:'D5',s:'D',q:'Какой аналитический тест лучше всего выявит фиктивных поставщиков?',o:['Сопоставление адресов и банковских реквизитов поставщиков с данными сотрудников','Расчёт оборачиваемости запасов','Анализ сроков закрытия периода','Сверка кассовой книги с выпиской'],c:0,e:'Совпадение адресов, телефонов или счетов поставщика и сотрудника — классический индикатор фиктивного поставщика.',w:['','Выявляет устаревшие запасы, а не поставщиков.','Не связано с поставщиками.','Выявляет кассовые расхождения.'],r:'Аналитика данных в выявлении мошенничества'}
+];
+
+/* Английский оригинал: qe, oe; k — слова-подсказки в английской формулировке; h — как подсказка ведёт к ответу */
+const EN={
+A1:["How are the Global Internal Audit Standards (2024) structured?",["5 domains, 15 principles, 52 standards","4 domains, 12 principles, 40 standards","6 domains, 17 principles, 52 standards","3 domains, 10 principles, 60 standards"],[],""],
+A2:["Which components of the 2024 IPPF are mandatory?",["Global Internal Audit Standards and Topical Requirements","Global Internal Audit Standards and Global Guidance","Mission, Core Principles, and Code of Ethics","Global Internal Audit Standards only"],["mandatory"],"«Mandatory» отсекает Global Guidance — в IPPF она рекомендуемая (recommended)."],
+A3:["According to the Purpose of Internal Auditing, to whom does internal audit provide independent, risk-based, and objective assurance, advice, insight, and foresight?",["The board and management","Shareholders and regulators","The external auditor","Heads of audited units"],["Purpose of Internal Auditing"],"Формулировку Purpose полезно знать почти дословно: «...to the board and management»."],
+A4:["Who approves the internal audit charter?",["The board","The chief executive officer","The chief audit executive","Management's risk committee"],["approves"],"В GIAS «approve» почти всегда означает совет; CAE — develops/maintains, руководство — supports."],
+A5:["Which reporting arrangement BEST supports the organizational independence of the chief audit executive?",["Functionally to the board, administratively to the CEO","Functionally and administratively to the CFO","Functionally to the CEO, administratively to the board","Functionally to management's risk committee"],["BEST","organizational independence"],"«BEST» — ищите наилучший, а не просто допустимый вариант; independence → прямое подчинение совету."],
+A6:["Which engagement is an advisory service rather than an assurance service?",["At management's request, internal audit helps design controls for an ERP being implemented","Internal audit evaluates procurement controls per the approved plan","Internal audit expresses an opinion on compliance with the AML policy","Internal audit verifies remediation of previously reported deficiencies"],["advisory","rather than"],"Маркеры консультации: «at management's request», «helps design». Маркеры заверения: «evaluates», «opinion», «verifies»."],
+A7:["When MUST internal auditors conform with a Topical Requirement (for example, cybersecurity)?",["When the topic is within the scope of an engagement or identified in the risk-based plan","Only when required by a regulator","Always, in every engagement, regardless of scope","Only during an external quality assessment"],["MUST","Topical Requirement"],"Абсолюты «always», «only» в дистракторах — частый признак неверного варианта."],
+A8:["Who should approve decisions regarding the appointment and removal of the chief audit executive?",["The board","The CEO alone","The HR director","The external auditor"],["approve","appointment and removal"],"Appointment and removal of the CAE → board (Essential Conditions)."],
+B1:["An auditor transferred to internal audit from procurement 8 months ago. The CAE wants to assign her to an assurance engagement on procurement. What is appropriate?",["Objectivity is presumed impaired — do not assign her to assurance of this activity","Assign her if she signs a no-conflict declaration","Assign her under supervision of a senior auditor","Assign her and disclose her prior role in the report"],["8 months ago","assurance engagement"],"Срок меньше 12 месяцев + слово «assurance» — ключ к правилу 12 месяцев. Для advisory ответ был бы другим."],
+B2:["Which of the following is NOT one of the five principles of the Ethics and Professionalism domain?",["Independence","Integrity","Due Professional Care","Confidentiality"],["NOT"],"NOT / EXCEPT / LEAST переворачивают логику — ищите лишнее. В переводе отрицание легко потерять."],
+B3:["Management explains a sharp increase in expenses as a \"one-time promotion.\" What does professional skepticism require?",["Corroborate the explanation with independent evidence","Accept it if it comes from senior management","Immediately report it as a finding","Remove the item from the engagement scope"],["professional skepticism","explains"],"Skepticism = questioning mind → corroborate (подтвердить)."],
+B4:["An acquaintance from another company asks whether layoffs are planned at the auditor's organization, which the auditor learned about during an engagement. What should the auditor do?",["Decline: information obtained during the work is not disclosed without authorization","Answer in general terms without figures","Answer if the information will soon be public","Consult the auditee manager first"],["learned about during an engagement"],"«Learned during an engagement» → Принцип 5, конфиденциальность."],
+B5:["During an engagement, an auditor realizes that the process owner is a close relative. What should the auditor do FIRST?",["Promptly disclose it to the CAE or engagement supervisor","Continue working but document more thoroughly","Disclose the conflict in the final report","Withdraw from the engagement without stating why"],["FIRST"],"FIRST — несколько вариантов могут быть разумными действиями, но нужен именно первый шаг."],
+B6:["Which statement about due professional care is true?",["It does not imply infallibility","It guarantees detection of all significant risks","It requires testing 100% of transactions","It applies only to assurance engagements"],["due professional care"],"Абсолюты (all, 100%, only, guarantees) в вариантах — подсказка против них."],
+B7:["At the end of an engagement, an auditee manager gives the auditor an expensive watch. What is the MOST appropriate action?",["Decline it and follow the organization's gift policy","Accept it, since the engagement is complete","Accept it and mention it in the report","Accept it if it is worth less than a month's salary"],["MOST appropriate","expensive"],""],
+C1:["How many components and principles does the COSO Internal Control–Integrated Framework (2013) include?",["5 components, 17 principles","5 components, 20 principles","8 components, 17 principles","4 components, 15 principles"],["Internal Control","2013"],"Год и название — подсказка: IC 2013 → 17 принципов; ERM 2017 → 20."],
+C2:["Under the IIA's Three Lines Model (2020), who performs second line roles?",["Management — risk management, compliance, and quality functions","Internal audit","The board","The external auditor"],["second line roles"],"Lines = roles, not departments: роли первой и второй линии — у руководства."],
+C3:["Which control is detective?",["Monthly reconciliation of the bank statement to the general ledger","Segregation of duties over payments","Dual authorization of payments before release","Restricting access rights in the ERP"],["detective"],"«before», «restricting», «segregation» — preventive; «reconciliation», «review» — detective."],
+C4:["What is risk appetite?",["The types and amount of risk an organization is willing to accept in pursuit of value","The maximum loss the organization can withstand","The risk remaining after management's response","The acceptable variation around a specific objective"],["risk appetite"],"appetite = willing to accept; capacity = can withstand; tolerance = acceptable variation."],
+C5:["Residual risk is:",["The risk remaining after management's actions to respond to risk","The risk before any controls are applied","The risk that the auditor fails to detect a material error","The risk transferred to an insurer"],["Residual"],"residual = remaining (остаточный); inherent = before controls."],
+C6:["Which of the following is NOT a component of COSO Enterprise Risk Management (2017)?",["Control Activities","Governance and Culture","Strategy and Objective-Setting","Review and Revision"],["NOT","Enterprise Risk Management (2017)"],"NOT + год 2017 → ищите компонент из COSO IC 2013."],
+C7:["Who has primary responsibility for designing and operating the system of internal control?",["Management","Internal audit","The board","The external auditor"],["primary responsibility","designing and operating"],"«Primary responsibility» за контроли, риски и предотвращение мошенничества почти всегда — management."],
+D1:["Which element of the fraud triangle can an organization influence MOST directly?",["Opportunity","Pressure (incentive)","Rationalization","All three equally"],["MOST directly"],"Контроли организации действуют на opportunity."],
+D2:["Which red flag is MOST characteristic of a lapping scheme involving accounts receivable?",["Delays in posting customer payments and an employee who refuses to take vacation","An increase in vendors sharing the same address","A sharp rise in entertainment expenses","Frequent inventory balance adjustments"],["lapping","accounts receivable"],"Термин схемы в вопросе (lapping) сразу сужает выбор до дебиторки и поступлений."],
+D3:["Which statement about internal auditors' role regarding fraud is correct?",["Auditors must have sufficient knowledge to evaluate fraud risk but are not expected to have the expertise of a fraud investigator","Auditors have primary responsibility for preventing fraud","Auditors must detect all instances of fraud","Fraud is outside internal audit's remit"],["role regarding fraud"],"primary responsibility for prevention → management; «all instances» — абсолют."],
+D4:["An auditor finds indicators of possible fraud. What should the auditor do FIRST?",["Inform the CAE and follow the organization's investigation policy","Interview the suspect to obtain a confession","Report directly to law enforcement","Continue testing without telling anyone until all evidence is gathered"],["FIRST","possible fraud"],"FIRST + possible (не доказанное) → эскалация по процедуре, а не самостоятельные действия."],
+D5:["Which data analytics test would BEST detect fictitious vendors?",["Matching vendor addresses and bank details to employee master data","Calculating inventory turnover","Analyzing period-close timing","Reconciling the cash book to the bank statement"],["BEST","fictitious vendors"],""]
+};
+SEED.forEach(q=>{const e=EN[q.id];if(e){q.qe=e[0];q.oe=e[1];q.k=e[2];q.h=e[3]}});
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const day=d=>(d||new Date()).toLocaleDateString('sv-SE');
+const L='ABCD';
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const blank=()=>({v:1,t:0,goal:20,exam:'',lang:'both',hl:false,pace:{n:0,s:0},days:{},sec:{},seen:{},wrong:{},bank:[]});
+const rx=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+function mark(t,ks,on){let h=esc(t);if(on&&ks)ks.forEach(k=>{if(k)h=h.replace(new RegExp(rx(esc(k)),'gi'),m=>`<mark>${m}</mark>`)});return h}
+function stem(q,show){
+  const lang=S.lang||'both';
+  if(lang==='ru'||!q.qe)return `<p class="stem">${esc(q.q)}</p>`;
+  const en=`<p class="stem" lang="en">${mark(q.qe,q.k,show||S.hl)}</p>`;
+  return lang==='en'?en:en+`<p class="ru">${esc(q.q)}</p>`;
+}
+function opt(q,i){const lang=S.lang||'both';if(lang==='ru'||!q.oe)return esc(q.o[i]);if(lang==='en')return esc(q.oe[i]);return `${esc(q.oe[i])}<small>${esc(q.o[i])}</small>`}
+function optT(q,i){return q.oe&&S.lang!=='ru'?q.oe[i]+(S.lang==='both'?' — '+q.o[i]:''):q.o[i]}
+function hint(q){return q.k&&q.k.length?`<p class="hint"><b>Подсказка в английском тексте:</b> ${q.k.map(esc).join(' · ')}${q.h?'<br>'+esc(q.h):''}</p>`:''}
+let S=blank();
+try{const x=JSON.parse(localStorage.getItem('cia1')||'null');if(x&&x.v)S=Object.assign(blank(),x)}catch(e){}
+let db=null,doc=null,writing=false,pending=false,timerSave=null,sample=null;
+
+function save(){
+  S.t=Date.now();
+  try{localStorage.setItem('cia1',JSON.stringify(S))}catch(e){}
+  clearTimeout(timerSave);timerSave=setTimeout(push,1200);
+}
+async function push(){
+  if(!doc)return setState('Прогресс сохраняется только в этом браузере.');
+  if(writing){pending=true;return}
+  writing=true;
+  try{await doc.set(JSON.parse(JSON.stringify(S)));setState('Прогресс сохранён в облаке — доступен с любого устройства.')}
+  catch(e){setState('Не удалось сохранить в облако, прогресс сохранён в этом браузере.')}
+  writing=false;if(pending){pending=false;push()}
+}
+function setState(t){$('#saveState').textContent=t}
+
+const all=()=>SEED.concat(S.bank);
+function record(q,i){
+  const ok=i===q.c,k=q.s,d=day();
+  S.sec[k]=S.sec[k]||{n:0,ok:0};S.sec[k].n++;if(ok)S.sec[k].ok++;
+  S.days[d]=(S.days[d]||0)+1;
+  S.seen[q.id]=(S.seen[q.id]||0)+1;
+  if(ok)delete S.wrong[q.id];else S.wrong[q.id]=1;
+  save();head();
+}
+
+function streak(){let n=0,d=new Date();if(!S.days[day(d)])d.setDate(d.getDate()-1);while(S.days[day(d)]){n++;d.setDate(d.getDate()-1)}return n}
+function head(){
+  const t=S.days[day()]||0,g=S.goal||20;
+  $('#tCount').textContent=t;$('#tGoal').textContent=g;
+  $('#ringP').style.strokeDashoffset=251.3*(1-Math.min(1,t/g));
+  $('#streak').textContent=streak();
+  const pc=S.pace&&S.pace.n?Math.round(S.pace.s/S.pace.n):null;$('#pace').textContent=pc??'—';$('#pace').style.color=pc&&pc>72?'var(--rose)':'';
+  if(S.exam){const n=Math.ceil((new Date(S.exam+'T09:00')-new Date())/864e5);$('#toExam').textContent=n>=0?n:'—';$('#toExamL').textContent=n>=0?'дней до экзамена':'дата экзамена прошла'}
+  else{$('#toExam').textContent='—';$('#toExamL').textContent='дата экзамена не задана'}
+  const left=g-t,nd=$('#nudge');
+  nd.classList.toggle('done',left<=0);
+  $('#nudgeT').textContent=left<=0?`Цель на сегодня выполнена: ${t} вопросов. Можно закрепить ошибки.`:t?`Сегодня ${t} из ${g}. Осталось ${left} — примерно ${Math.ceil(left*1.2)} мин в темпе экзамена.`:`Сегодня ещё не занимались. ${g} вопросов — это около ${Math.ceil(g*1.2)} минут.`;
+  const w=Object.keys(S.wrong).length;$('#wrongN').textContent=w?`(${w})`:'';
+}
+
+/* ---------- тренировка ---------- */
+let P={q:null,ord:null,ans:null,queue:null};
+function pick(sec){
+  let pool=all().filter(q=>!sec||q.s===sec);
+  const min=Math.min(...pool.map(q=>S.seen[q.id]||0));
+  pool=pool.filter(q=>(S.seen[q.id]||0)===min&&q.id!==P.q?.id);
+  return pool[Math.floor(Math.random()*pool.length)]||all()[0];
+}
+function nextQ(){
+  if(P.queue&&P.queue.length){P.q=all().find(q=>q.id===P.queue.shift())}else{P.queue=null;P.q=pick($('#secSel').value)}
+  P.ord=shuffle([0,1,2,3]);P.ans=null;P.t0=Date.now();P.sec=0;drawQ();
+}
+setInterval(()=>{const el=$('#qT');if(el&&P.ans==null){const s=Math.round((Date.now()-P.t0)/1000);el.textContent=`${s} с`;el.style.color=s>72?'var(--rose)':''}},1000);
+function drawQ(){
+  const q=P.q,box=$('#qCard');if(!q){box.textContent='Нет вопросов.';return}
+  const a=P.ans;
+  let h=`<div class="row" style="justify-content:space-between"><div class="meta">Раздел ${q.s} · ${esc(SEC[q.s][0])}${q.gen?' · вопрос от Claude':''}${P.queue?` · повтор ошибок, осталось ${P.queue.length}`:''}</div><div class="meta" id="qT">${a!=null?'':'0 с'}</div></div>${stem(q,a!=null)}<div class="opts">`;
+  P.ord.forEach((oi,k)=>{let c='';if(a!=null){if(oi===q.c)c='good';else if(oi===a)c='bad'}
+    h+=`<button class="opt ${c}" data-i="${oi}" ${a!=null?'disabled':''}><i>${L[k]}</i><span>${opt(q,oi)}</span></button>`});
+  h+='</div>';
+  if(a!=null){
+    const ok=a===q.c;
+    h+=`<div class="why"><p class="verdict ${ok?'ok':'no'}">${ok?'Верно':'Неверно'} <span class="note">· ${P.sec} с ${P.sec>72?'— дольше экзаменного темпа 72 с':'— в темпе экзамена'}</span></p>${hint(q)}<p>${esc(q.e)}</p><ul>`;
+    P.ord.forEach((oi,k)=>{if(oi!==q.c&&q.w&&q.w[oi])h+=`<li><b>${L[k]}.</b> ${esc(q.w[oi])}</li>`});
+    h+=`</ul><span class="ref">${esc(q.r||'GIAS')}</span><div class="row" style="margin-top:16px"><button class="btn pri" id="goNext">Следующий вопрос</button>${sample?'<button class="btn" id="deep">Разобрать подробнее с Claude</button>':''}</div><div class="ai" id="aiOut"></div></div>`;
+  }
+  box.innerHTML=h;
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{P.ans=+b.dataset.i;P.sec=Math.round((Date.now()-P.t0)/1000);S.pace=S.pace||{n:0,s:0};S.pace.n++;S.pace.s+=Math.min(P.sec,300);record(q,P.ans);drawQ()});
+  const g=$('#goNext');if(g){g.onclick=nextQ;g.focus()}
+  const d=$('#deep');if(d)d.onclick=()=>deep(q,P.ans,d);
+}
+async function deep(q,a,btn){
+  btn.disabled=true;const out=$('#aiOut');out.textContent='Claude думает…';
+  const p=`Ты преподаватель по подготовке к экзамену CIA Part 1 (программа 2025, Global Internal Audit Standards 2024). Объясни по-русски, кратко и по делу (до 220 слов), без markdown-заголовков.
+Вопрос: ${q.qe?q.qe+' / ':''}${q.q}
+Варианты: ${q.o.map((o,i)=>L[i]+') '+(q.oe?q.oe[i]+' / ':'')+o).join('; ')}
+Правильный: ${L[q.c]}. Кандидат выбрал: ${L[a]}.
+Дай: 1) почему правильный ответ верен со ссылкой на конкретный стандарт/принцип GIAS; 2) какую логическую ловушку содержит выбранный вариант (если он неверен); 3) какие слова в АНГЛИЙСКОЙ формулировке подсказывают ответ (кандидат сдаёт экзамен с переводом и теряет эти нюансы); 4) одно короткое правило-запоминалку.`;
+  try{const r=await sample(p,{onText:x=>{out.textContent=x.text},modelTier:'default'});out.textContent=r.text}
+  catch(e){out.textContent=e.code==='rate_limited'?'Слишком много запросов, попробуйте через минуту.':'Не удалось получить разбор.';btn.disabled=false}
+}
+
+/* ---------- генерация ---------- */
+async function generate(sec,n){
+  const s=sec||shuffle(['A','A','A','C','C','B','B','D'])[0];
+  const p=`Составь ${n} новых вопросов с выбором ответа в стиле экзамена CIA Part 1 «Internal Audit Fundamentals» (программа 2025) на русском языке.
+Раздел: ${s} — ${SEC[s][0]}.
+Опирайся на Global Internal Audit Standards (IIA, 2024: 5 доменов, 15 принципов, 52 стандарта), Модель трёх линий, COSO, и программу CIA 2025. Используй только то, в чём уверен; не выдумывай номера стандартов.
+Требования: преимущественно ситуационные задачи (как на реальном экзамене), 4 варианта, ровно один верный, правдоподобные дистракторы, верный ответ в разных позициях, разная сложность, не повторяй очевидные темы вроде «5 доменов 15 принципов».
+Пиши вопрос сначала на английском так, как он звучал бы на реальном экзамене IIA (с типичными словами MOST, BEST, FIRST, NOT, EXCEPT, primary responsibility, must/should и т.п.), затем точный русский перевод.
+Ответ — ТОЛЬКО JSON-массив без пояснений, элементы:
+{"qe":"question in English","oe":["opt1","opt2","opt3","opt4"],"q":"перевод вопроса на русский","o":["перевод1","перевод2","перевод3","перевод4"],"c":индекс_верного_0_3,"k":["1-3 точных фрагмента из qe, которые подсказывают ответ"],"h":"по-русски: как эти слова ведут к ответу (1 предложение)","e":"почему верный ответ верен (2-3 предложения, по-русски)","w":["почему неверен вариант1 или пустая строка для верного","...","...","..."],"r":"ссылка, напр. Стандарт 2.2 или Принцип 7"}`;
+  const r=await sample(p,{modelTier:'default',cache:false});
+  const t=r.text,a=t.indexOf('['),b=t.lastIndexOf(']');
+  const arr=JSON.parse(t.slice(a,b+1));
+  const ok=arr.filter(x=>x&&typeof x.q==='string'&&Array.isArray(x.o)&&x.o.length===4&&Number.isInteger(x.c)&&x.c>=0&&x.c<4).map((x,i)=>({id:'g'+Date.now().toString(36)+i,s,gen:1,q:String(x.q),o:x.o.map(String),c:x.c,e:String(x.e||''),w:Array.isArray(x.w)?x.w.map(String).slice(0,4):[],r:String(x.r||''),...(Array.isArray(x.oe)&&x.oe.length===4&&x.qe?{qe:String(x.qe),oe:x.oe.map(String),k:Array.isArray(x.k)?x.k.map(String).slice(0,3):[],h:String(x.h||'')}:{})}));
+  S.bank=S.bank.concat(ok).slice(-220);save();return ok;
+}
+$('#genBtn').onclick=async()=>{
+  const b=$('#genBtn'),note=$('#genNote');b.disabled=true;note.textContent='Claude составляет 5 вопросов, обычно 20–40 секунд…';
+  try{const g=await generate($('#secSel').value,5);note.textContent=`Добавлено вопросов: ${g.length}. Всего в банке: ${all().length}.`;P.queue=g.map(q=>q.id);nextQ()}
+  catch(e){note.textContent=e&&e.code==='rate_limited'?'Слишком много запросов — попробуйте через минуту.':'Не получилось сгенерировать, попробуйте ещё раз.'}
+  b.disabled=false;
+};
+
+/* ---------- экзамен ---------- */
+let E=null,tick=null;
+function examSetup(){
+  clearInterval(tick);E=null;
+  $('#examBox').innerHTML=`<h2>Экзамен на время</h2><p>Темп реального Part 1: 125 вопросов за 150 минут — <b>72 секунды на вопрос</b>. Разбор — только после завершения, как на экзамене.</p>
+  <div class="row"><select id="exN"><option value="10">10 вопросов · 12 мин</option><option value="25" selected>25 вопросов · 30 мин</option><option value="50">50 вопросов · 60 мин</option><option value="125">125 вопросов · 150 мин (полный)</option></select><button class="btn pri" id="exGo">Начать</button></div>
+  <p class="note" id="exNote">В банке сейчас ${all().length} вопросов. Вопросы подбираются пропорционально весам разделов. Если вопросов не хватает, Claude досоставит их перед стартом.</p>`;
+  $('#exGo').onclick=examStart;
+}
+async function examStart(){
+  const n=+$('#exN').value,note=$('#exNote'),btn=$('#exGo');
+  if(all().length<n){
+    if(!sample){note.textContent=`Для ${n} вопросов не хватает банка (${all().length}). Выберите меньший вариант.`;return}
+    btn.disabled=true;
+    try{while(all().length<n){note.textContent=`Claude составляет вопросы: ${all().length} из ${n}…`;const need=Math.min(10,n-all().length);const s=Object.keys(SEC).map(k=>[k,SEC[k][1]*n/100-all().filter(q=>q.s===k).length]).sort((a,b)=>b[1]-a[1])[0][0];await generate(s,need)}}
+    catch(e){note.textContent='Генерация прервалась. Начните с меньшим числом вопросов.';btn.disabled=false;return}
+  }
+  let qs=[];
+  for(const k in SEC){const want=Math.round(SEC[k][1]*n/100);const pool=shuffle(all().filter(q=>q.s===k)).sort((a,b)=>(S.seen[a.id]||0)-(S.seen[b.id]||0));qs=qs.concat(pool.slice(0,want))}
+  const rest=shuffle(all().filter(q=>!qs.includes(q)));while(qs.length<n&&rest.length)qs.push(rest.pop());
+  qs=shuffle(qs.slice(0,n));
+  E={qs,ord:qs.map(()=>shuffle([0,1,2,3])),ans:qs.map(()=>null),flag:qs.map(()=>false),i:0,end:Date.now()+n*72e3};
+  tick=setInterval(()=>{if(E.end-Date.now()<=0)examFinish();else drawTimer()},1000);
+  examDraw();
+}
+function drawTimer(){const s=Math.max(0,Math.round((E.end-Date.now())/1000)),el=$('#exT');if(!el)return;el.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;el.classList.toggle('low',s<E.qs.length*72*.1)}
+function examDraw(){
+  const q=E.qs[E.i],done=E.ans.filter(x=>x!=null).length;
+  let h=`<div class="row" style="justify-content:space-between"><div class="timer" id="exT"></div><div class="note">Отвечено ${done} из ${E.qs.length}</div></div><div class="grid">`;
+  E.qs.forEach((_,k)=>h+=`<button data-k="${k}" class="${E.ans[k]!=null?'a':''} ${k===E.i?'cur':''} ${E.flag[k]?'f':''}" aria-label="Вопрос ${k+1}">${k+1}</button>`);
+  h+=`</div><div class="meta">Вопрос ${E.i+1}</div>${stem(q,false)}<div class="opts">`;
+  E.ord[E.i].forEach((oi,k)=>h+=`<button class="opt ${E.ans[E.i]===oi?'pick':''}" data-i="${oi}"><i>${L[k]}</i><span>${opt(q,oi)}</span></button>`);
+  h+=`</div><div class="row" style="margin-top:18px;justify-content:space-between"><div class="row"><button class="btn" id="exPrev" ${E.i?'':'disabled'}>Назад</button><button class="btn" id="exNext" ${E.i<E.qs.length-1?'':'disabled'}>Далее</button><button class="btn" id="exFlag">${E.flag[E.i]?'Снять отметку':'Отметить'}</button></div><button class="btn pri" id="exEnd">Завершить</button></div><p class="note" id="exWarn"></p>`;
+  $('#examBox').innerHTML=h;drawTimer();
+  $('#examBox').querySelectorAll('.grid button').forEach(b=>b.onclick=()=>{E.i=+b.dataset.k;examDraw()});
+  $('#examBox').querySelectorAll('.opt').forEach(b=>b.onclick=()=>{E.ans[E.i]=+b.dataset.i;if(E.i<E.qs.length-1)E.i++;examDraw()});
+  $('#exPrev').onclick=()=>{E.i--;examDraw()};$('#exNext').onclick=()=>{E.i++;examDraw()};
+  $('#exFlag').onclick=()=>{E.flag[E.i]=!E.flag[E.i];examDraw()};
+  $('#exEnd').onclick=()=>{const left=E.ans.filter(x=>x==null).length;if(left&&!E.sure){E.sure=1;$('#exWarn').textContent=`Без ответа: ${left}. Нажмите «Завершить» ещё раз, чтобы сдать.`;return}examFinish()};
+}
+function examFinish(){
+  clearInterval(tick);if(!E||E.over)return;E.over=1;
+  const used=Math.round((E.qs.length*72e3-(E.end-Date.now()))/6e4);
+  let ok=0;const by={};
+  E.qs.forEach((q,k)=>{const a=E.ans[k],g=a===q.c;if(g)ok++;by[q.s]=by[q.s]||[0,0];by[q.s][1]++;if(g)by[q.s][0]++;if(a!=null)record(q,a);else{S.wrong[q.id]=1}});
+  save();head();
+  const pct=Math.round(ok/E.qs.length*100);
+  let h=`<h2>Результат</h2><div class="row" style="gap:28px"><div class="big" style="color:${pct>=80?'var(--ok)':'var(--rose)'}">${pct}%</div><div><p style="margin:0">${ok} из ${E.qs.length} верно · ${Math.max(0,used)} мин</p><p class="note" style="margin:0">Ориентир для сдачи — около 80% (проходной балл 600 из 750 по шкале IIA).</p></div></div><div class="bars" style="margin:22px 0">`;
+  for(const k in by){const p=Math.round(by[k][0]/by[k][1]*100);h+=`<div class="bar"><div class="lab">${k}. ${esc(SEC[k][0])}<span>${by[k][0]}/${by[k][1]} · ${p}%</span></div><div class="track"><i class="${p>=80?'hi':p<60?'lo':''}" style="width:${p}%"></i><s></s></div></div>`}
+  h+='</div><h2>Разбор</h2>';
+  E.qs.forEach((q,k)=>{const a=E.ans[k],g=a===q.c;h+=`<details><summary>${g?'✓':'✗'} ${k+1}. ${esc(q.q.slice(0,110))}${q.q.length>110?'…':''}</summary><div style="margin-top:10px">${stem(q,true)}</div><p>Ваш ответ: <b>${a==null?'нет ответа':esc(optT(q,a))}</b><br>Правильный: <b style="color:var(--ok)">${esc(optT(q,q.c))}</b></p>${hint(q)}<p>${esc(q.e)}</p>${a!=null&&!g&&q.w&&q.w[a]?`<p class="note">Почему ваш вариант неверен: ${esc(q.w[a])}</p>`:''}<span class="ref">${esc(q.r||'GIAS')}</span></details>`});
+  h+='<div class="row" style="margin-top:18px"><button class="btn pri" id="exAgain">Новый экзамен</button></div>';
+  $('#examBox').innerHTML=h;$('#exAgain').onclick=examSetup;
+}
+
+/* ---------- ошибки ---------- */
+function wrongDraw(){
+  const ids=Object.keys(S.wrong).filter(id=>all().some(q=>q.id===id));
+  let h=`<h2>Ошибки</h2>`;
+  if(!ids.length){$('#wrongBox').innerHTML=h+'<p>Пока ошибок нет. Вопрос попадает сюда при неверном ответе и уходит, когда вы ответите на него правильно.</p>';return}
+  h+=`<p>${ids.length} вопросов ждут повторения. Верный ответ убирает вопрос из списка.</p><div class="row"><button class="btn pri" id="wGo">Повторить ошибки</button></div>`;
+  ids.forEach(id=>{const q=all().find(x=>x.id===id);h+=`<details><summary>${q.s} · ${esc(q.q.slice(0,120))}${q.q.length>120?'…':''}</summary><p>Правильный ответ: <b>${esc(q.o[q.c])}</b></p><p>${esc(q.e)}</p><span class="ref">${esc(q.r||'GIAS')}</span></details>`});
+  $('#wrongBox').innerHTML=h;
+  $('#wGo').onclick=()=>{P.queue=shuffle(ids);show('train');nextQ()};
+}
+
+/* ---------- прогресс ---------- */
+function progDraw(){
+  const tot=Object.values(S.sec).reduce((a,x)=>a+x.n,0),okT=Object.values(S.sec).reduce((a,x)=>a+x.ok,0);
+  let weak=null,h=`<h2>Прогресс по разделам Part 1</h2><p>${tot?`Всего ответов: ${tot}, точность ${Math.round(okT/tot*100)}%.`:'Ответьте на первые вопросы — здесь появится статистика.'} Белая черта — ориентир 80%.</p><div class="bars">`;
+  for(const k in SEC){const x=S.sec[k]||{n:0,ok:0},p=x.n?Math.round(x.ok/x.n*100):0;
+    if(x.n>=5&&(!weak||p<weak[1]))weak=[k,p];
+    h+=`<div class="bar"><div class="lab">${k}. ${esc(SEC[k][0])} — вес ${SEC[k][1]}%<span>${x.n?`${p}% · ${x.ok}/${x.n}`:'нет ответов'}</span></div><div class="track"><i class="${p>=80?'hi':p<60&&x.n?'lo':''}" style="width:${p}%"></i><s></s></div></div>`}
+  h+='</div>';
+  if(weak&&weak[1]<80)h+=`<p style="margin-top:18px">Слабее всего: <b>раздел ${weak[0]} — ${esc(SEC[weak[0]][0])}</b> (${weak[1]}%). Начните следующую сессию с него.</p><button class="btn pri" id="pWeak">Тренировать раздел ${weak[0]}</button>`;
+  h+='<h2 style="margin-top:28px">Последние 4 недели</h2><div class="heat">';
+  for(let i=27;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const n=S.days[day(d)]||0;h+=`<i title="${day(d)}: ${n}" style="background:${n?`rgba(255,143,163,${Math.min(1,.25+n/(S.goal||20)*.75)})`:''}"></i>`}
+  h+='</div><p class="note">Цвет ярче — ближе к дневной цели.</p>';
+  $('#progBox').innerHTML=h;
+  const w=$('#pWeak');if(w)w.onclick=()=>{$('#secSel').value=weak[0];show('train');nextQ()};
+}
+
+/* ---------- навигация и настройки ---------- */
+function show(v){
+  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));
+  ['train','exam','wrong','cues','prog','set'].forEach(x=>$('#v-'+x).classList.toggle('hide',x!==v));
+  if(v==='exam'&&!E)examSetup();if(v==='wrong')wrongDraw();if(v==='prog')progDraw();
+  try{history.replaceState(null,'','#'+v)}catch(e){}
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+$('#secSel').innerHTML='<option value="">Все разделы</option>'+Object.keys(SEC).map(k=>`<option value="${k}">${k}. ${esc(SEC[k][0])} (${SEC[k][1]}%)</option>`).join('');
+$('#secSel').onchange=()=>{P.queue=null;nextQ()};
+$('#nextBtn').onclick=nextQ;
+$('#quick').onclick=()=>{show('exam');examSetup();$('#exN').value='10'};
+$('#examDate').onchange=e=>{S.exam=e.target.value;save();head()};
+$('#goal').onchange=e=>{S.goal=Math.max(5,+e.target.value||20);save();head()};
+$('#copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify(S));$('#setMsg').textContent='Скопировано.'}catch(e){$('#setMsg').textContent='Буфер обмена недоступен.'}};
+$('#resetBtn').onclick=()=>{if($('#resetBtn').dataset.sure){const b=S.bank;S=blank();S.bank=b;save();head();$('#resetBtn').dataset.sure='';$('#resetBtn').textContent='Сбросить статистику';$('#setMsg').textContent='Статистика сброшена, сгенерированные вопросы сохранены.'}else{$('#resetBtn').dataset.sure=1;$('#resetBtn').textContent='Точно сбросить?'}};
+$('#lang').onchange=e=>{S.lang=e.target.value;save();drawQ()};
+$('#hl').onchange=e=>{S.hl=e.target.checked;save();drawQ()};
+function fillSet(){$('#examDate').value=S.exam||'';$('#goal').value=S.goal||20;$('#lang').value=S.lang||'both';$('#hl').checked=!!S.hl}
+
+fillSet();head();nextQ();setState('Прогресс сохраняется в этом браузере.');
+const h0=location.hash.slice(1);if(['train','exam','wrong','cues','prog','set'].includes(h0))show(h0);
+
+(async()=>{
+  try{sample=await claude.use('sample')}catch(e){}
+  if(!sample){$('#genBtn').classList.add('hide');$('#genNote').textContent='Генерация новых вопросов работает, когда приложение открыто на claude.ai.'}else if(P.ans!=null)drawQ();
+})();
+(async()=>{
+  try{db=await claude.use('db')}catch(e){}
+  if(!db)return;
+  try{
+    doc=db.doc('progress/main');
+    let r=await doc.get();if(r&&typeof r.data==='function')r=r.data();else if(r&&r.data&&!r.v)r=r.data;
+    if(r&&r.v&&(r.t||0)>(S.t||0)){S=Object.assign(blank(),r);try{localStorage.setItem('cia1',JSON.stringify(S))}catch(e){}fillSet();head();setState('Прогресс загружен из облака.')}
+    else if(S.t)push();else setState('Прогресс будет сохраняться в облаке.');
+  }catch(e){doc=null;setState('Облачное сохранение недоступно, прогресс хранится в этом браузере.')}
+})();
+}
+</script>
+</body>
+</html>
